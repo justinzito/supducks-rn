@@ -1,12 +1,9 @@
-import React, {useEffect, useRef, useState } from 'react';
-import { Animated, useWindowDimensions, View, SafeAreaView, Platform, Image, Text, TouchableOpacity, Pressable } from 'react-native';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import React, {useEffect, useRef, useState, createRef } from 'react';
+import { Animated, useWindowDimensions, View, SafeAreaView, Platform, Image, Text, TouchableOpacity, Pressable, Share } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DragRotateScaleImage } from '../components/dragRotateScaleImage';
-import { PinchableBox } from '../components/rotateAndScale';
+import { captureRef } from 'react-native-view-shot';
 
-const CURSOR_SIDE_SIZE = 20;
-const CURSOR_HALF_SIDE_SIZE = CURSOR_SIDE_SIZE / 2;
 
 export function Canvas({navigation}) {
 
@@ -27,6 +24,7 @@ export function Canvas({navigation}) {
         }
     );
 
+    const frameRef = createRef();
 
     var scratchState = itemState.items.length-1 >= 0 ? 
     itemState.items[itemState.items.length-1].transform : 
@@ -36,16 +34,7 @@ export function Canvas({navigation}) {
         rotate: 0,
         scaleX: 1
     };
-/*
-    var scratchState = {
-        offset: {x: 0, y: 0},
-        scale: 1,
-        rotate: 0,
-        scaleX: 1
-    };
-    */
 
-    
     useEffect(() => {
        //console.log("selected index: " + JSON.stringify(itemState))
        if (itemState.selectedIndex > -1) {
@@ -239,11 +228,43 @@ export function Canvas({navigation}) {
         
     }
 
+    const snapImage = async () => {
+
+        const snapshot = await captureRef(frameRef,{
+            result: 'tmpfile',
+            quality: 1,
+            format: 'png'
+        });
+
+        console.log(snapshot);
+        
+        try {
+            const result = await Share.share({
+              title: 'Sup Sup Sup',
+              url: snapshot,
+              message: snapshot
+            });
+            if (result.action === Share.sharedAction) {
+              if (result.activityType) {
+                // shared with activity type of result.activityType
+              } else {
+                // shared
+              }
+            } else if (result.action === Share.dismissedAction) {
+              // dismissed
+            }
+          } catch (error) {
+            alert(error.message);
+          }
+    
+    }
+
     const insets = useSafeAreaInsets();
     
     return (
         <SafeAreaView
             style={{flex: 1, backgroundColor: "#ffffff"}}
+            ref={frameRef}
         >
             {itemState.items.map((item,index) =>
                 <ImageItemView key={index} itemIndex={index} />
@@ -285,6 +306,15 @@ export function Canvas({navigation}) {
                         <Text
                             style={{color: "#ffffff"}}>
                                 OK
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={{flex: 1, height: 60, margin: 10, backgroundColor: "#7700f2", alignItems: "center", justifyContent: "center"}}
+                        onPress={() => snapImage()}
+                    >
+                        <Text
+                            style={{color: "#ffffff"}}>
+                                [O]
                         </Text>
                     </TouchableOpacity>
             </SafeAreaView>
