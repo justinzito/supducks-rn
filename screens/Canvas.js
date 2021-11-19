@@ -1,9 +1,19 @@
 import React, {useEffect, useRef, useState, createRef } from 'react';
-import { Animated, useWindowDimensions, View, SafeAreaView, Platform, Image, Text, TouchableOpacity, Pressable, Share } from 'react-native';
+import { 
+    Animated,
+    useWindowDimensions,
+    SafeAreaView,
+    Platform,
+    Image,
+    Text,
+    TouchableOpacity,
+    View,
+    Pressable,
+    Share } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DragRotateScaleImage } from '../components/dragRotateScaleImage';
 import { captureRef } from 'react-native-view-shot';
-
+import * as Sharing from 'expo-sharing';
 
 export function Canvas({navigation}) {
 
@@ -138,12 +148,92 @@ export function Canvas({navigation}) {
         }
     }
 
+    const Toolbar = () => {
 
-    const touch = useRef(
-        new Animated.ValueXY({x: 0, y: 0})
-    ).current;
-    
-    const dimensions = useWindowDimensions();
+        if (itemState.selectedIndex > -1) {
+            return (
+                <View
+                    style={{
+                        flexDirection: "row",
+                        position: "absolute",
+                        bottom: 0,
+                        height: insets.bottom + window.width/3,
+                        width: window.width-20,
+                        marginHorizontal: 10
+                    }}
+                >
+                    <TouchableOpacity
+                        style={{flex: 1, alignItems: "center", marginHorizontal: 10}}
+                        onPress={() => deletePressed()}
+                        activeOpacity={0.5}
+                    >
+                        <Image
+                            source={require('../assets/delete_button.png')}
+                            style={{resizeMode: "contain", height: window.width/3-20, width: window.width/3-20}} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={{flex: 1, alignItems: "center", marginHorizontal: 10}}
+                        onPress={() => flipPressed()}
+                        activeOpacity={0.5}
+                    >
+                        <Image
+                            source={require('../assets/flip_button.png')}
+                            style={{resizeMode: "contain", height: window.width/3-20, width: window.width/3-20}} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={{flex: 1, alignItems: "center", marginHorizontal: 10}}
+                        onPress={() => okPressed()}
+                        activeOpacity={0.5}
+                    >
+                        <Image
+                            source={require('../assets/ok_button.png')}
+                            style={{resizeMode: "contain", height: window.width/3-20, width: window.width/3-20}} />
+                    </TouchableOpacity>
+                </View>
+            );
+        }
+
+        return (
+            <View
+                style={{
+                    flexDirection: "row",
+                    position: "absolute",
+                    bottom: 0,
+                    height: insets.bottom + window.width/3,
+                    width: window.width-20,
+                    marginHorizontal: 10
+                }}
+            >
+                    <TouchableOpacity
+                        style={{flex: 1, alignItems: "center", marginHorizontal: 10}}
+                        onPress={() => backPressed()}
+                        activeOpacity={0.5}
+                    >
+                        <Image
+                            source={require('../assets/back_button.png')}
+                            style={{resizeMode: "contain", height: window.width/3-20, width: window.width/3-20}} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={{flex: 1, alignItems: "center", marginHorizontal: 0}}
+                        onPress={() => addPressed()}
+                        activeOpacity={0.5}
+                    >
+                        <Image
+                            source={require('../assets/duck1.png')}
+                            style={{resizeMode: "contain", height: insets.bottom + window.width/2-20, width: window.width/3-20,position: "absolute", bottom: -10}} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={{flex: 1, alignItems: "center", marginHorizontal: 10}}
+                        onPress={() => snapImage()}
+                        activeOpacity={0.5}
+                    >
+                        <Image
+                            source={require('../assets/save_button.png')}
+                            style={{resizeMode: "contain", height: window.width/3-20, width: window.width/3-20}} />
+                    </TouchableOpacity>
+            </View>
+        );
+    }
 
 
     const itemSelected = (index) => {
@@ -160,6 +250,10 @@ export function Canvas({navigation}) {
         
         scratchState = {...scratchState,...itemAttributes};
 
+    }
+
+    const backPressed = () => {
+        navigation.goBack()
     }
 
     const okPressed = () => {
@@ -237,87 +331,84 @@ export function Canvas({navigation}) {
         });
 
         console.log(snapshot);
-        
-        try {
-            const result = await Share.share({
-              title: 'Sup Sup Sup',
-              url: snapshot,
-              message: snapshot
+
+        if (Platform.OS === 'android') {
+            const response = await Sharing.shareAsync(snapshot,{
+                dialogTitle: "Sup",
+                mimeType: "image/png"
             });
-            if (result.action === Share.sharedAction) {
-              if (result.activityType) {
-                // shared with activity type of result.activityType
-              } else {
-                // shared
+        } else {
+            try {
+                const result = await Share.share({
+                  title: 'Sup Sup Sup',
+                  url: snapshot,
+                  message: snapshot
+                });
+                if (result.action === Share.sharedAction) {
+                  if (result.activityType) {
+                    // shared with activity type of result.activityType
+                  } else {
+                    // shared
+                  }
+                } else if (result.action === Share.dismissedAction) {
+                  // dismissed
+                }
+              } catch (error) {
+                alert(error.message);
               }
-            } else if (result.action === Share.dismissedAction) {
-              // dismissed
-            }
-          } catch (error) {
-            alert(error.message);
-          }
-    
+        }
     }
 
     const insets = useSafeAreaInsets();
+    const window = useWindowDimensions();
+
     
     return (
         <SafeAreaView
             style={{flex: 1, backgroundColor: "#ffffff"}}
-            ref={frameRef}
         >
+            <Image
+                source={require('../assets/booth_bg.png')}
+                style={{flex: 1, position: "absolute", width: "100%", height: window.height, top: 0}}
+                resizeMode="cover"
+            />
+            <View 
+                style={{
+                    alignSelf: "center",
+                    marginHorizontal: 20,
+                    marginVertical: Platform.OS ==='android' ? 60 : 20, width: window.width - 40,
+                    height: window.height*0.6,
+                    backgroundColor: "#e0e0e0",
+                    overflow: "hidden"
+                }}
+                ref={frameRef}
+            >
+                <Image
+                    source={require('../assets/image_default_bg.png')}
+                    resizeMode="contain"
+                    style={{position: "absolute"}}
+                />
             {itemState.items.map((item,index) =>
                 <ImageItemView key={index} itemIndex={index} />
             )}
-
-            <SafeAreaView
-                style={{flexDirection: "row", position: "absolute", bottom: 0, height: insets.bottom + 100 ,width: "100%", backgroundColor: "#777777"}}>
-                    <TouchableOpacity
-                        style={{flex: 1, height: 60, margin: 10, backgroundColor: "#f8014a", alignItems: "center", justifyContent: "center"}}
-                        onPress={() => deletePressed()}
-                    >
-                        <Text
-                            style={{color: "#ffffff"}}>
-                                Delete
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={{flex: 1, height: 60, margin: 10, backgroundColor: "#450777", alignItems: "center", justifyContent: "center"}}
-                        onPress={() => addPressed()}
-                    >
-                        <Text
-                            style={{color: "#ffffff"}}>
-                                Add
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={{flex: 1, height: 60, margin: 10, backgroundColor: "#0461f2", alignItems: "center", justifyContent: "center"}}
-                        onPress={() => flipPressed()}
-                    >
-                        <Text
-                            style={{color: "#ffffff"}}>
-                                FLIP
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={{flex: 1, height: 60, margin: 10, backgroundColor: "#7700f2", alignItems: "center", justifyContent: "center"}}
-                        onPress={() => okPressed()}
-                    >
-                        <Text
-                            style={{color: "#ffffff"}}>
-                                OK
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={{flex: 1, height: 60, margin: 10, backgroundColor: "#7700f2", alignItems: "center", justifyContent: "center"}}
-                        onPress={() => snapImage()}
-                    >
-                        <Text
-                            style={{color: "#ffffff"}}>
-                                [O]
-                        </Text>
-                    </TouchableOpacity>
-            </SafeAreaView>
+            </View>
+            <View
+                pointerEvents="none"
+                style={{
+                    alignSelf: "center",
+                    marginHorizontal: 20,
+                    marginVertical: Platform.OS ==='android' ? 60 : 20, width: window.width - 20,
+                    height: Platform.OS ==='android' ? window.height*0.6+insets.top : window.height*0.6+insets.top-15,
+                    position: "absolute",
+                    top: Platform.OS ==='android' ? -10 : insets.top - 10}}
+            >
+            <Image
+                source={require('../assets/image_frame.png')}
+                style={{flex: 1, position: "absolute", width: "100%", height: "100%"}}
+                resizeMode="stretch"
+                />
+            </View>
+            <Toolbar />
         </SafeAreaView>
     )
 }
