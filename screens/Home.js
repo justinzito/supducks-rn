@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     useWindowDimensions,
     View,
@@ -8,16 +8,39 @@ import {
     TouchableOpacity
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as ImagePicker from 'expo-image-picker';
 
 export function Home({navigation}) {
 
+    const [image, setImage] = useState(null);
 
     const insets = useSafeAreaInsets();
     const window = useWindowDimensions();
 
 
-    const cameraPressed = () => {
-        navigation.navigate('Canvas',{})
+    const cameraPressed = async () => {
+        //navigation.navigate('Canvas',{})
+        
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        //const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+          alert('Sorry, we need camera roll permissions to make this work!');
+          return
+        }
+        //launchImageLibraryAsync
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: false,
+            aspect: [4, 3],
+            quality: 1,
+          });
+      
+          
+          console.log(result)
+          if (!result.cancelled) {
+            setImage({uri: result.uri});
+          }
+
     }
 
     return (
