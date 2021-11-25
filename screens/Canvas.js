@@ -15,7 +15,10 @@ import { DragRotateScaleImage } from '../components/dragRotateScaleImage';
 import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 
-export function Canvas({navigation}) {
+export function Canvas({navigation, route}) {
+
+    const [image,setImage] = useState(require('../assets/image_default_bg.png'));
+
 
     const [itemState, setItemState] = useState(
         {
@@ -52,7 +55,15 @@ export function Canvas({navigation}) {
        }
     },[itemState.selectedIndex]);
 
+    
+    useEffect(() => {
+        //console.log("image loading: " + JSON.stringify(route.params.image));
+        //setImage(require('../assets/image_default_bg.png'));
+        setImage(route.params.image)
+        
+     },[]);
 
+   
     const ImageItemView = ({itemIndex}) => {
 
         var itemAttrs = itemState.items[itemIndex];
@@ -215,7 +226,7 @@ export function Canvas({navigation}) {
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={{flex: 1, alignItems: "center", marginHorizontal: 0}}
-                        onPress={() => addPressed()}
+                        onPress={() => navigation.navigate('ImagePicker',{})} //addPressed()
                         activeOpacity={0.5}
                     >
                         <Image
@@ -378,15 +389,15 @@ export function Canvas({navigation}) {
                     marginHorizontal: 20,
                     marginVertical: Platform.OS ==='android' ? 60 : 20, width: window.width - 40,
                     height: window.height*0.6,
-                    backgroundColor: "#e0e0e0",
+                    backgroundColor: "#ffffff",
                     overflow: "hidden"
                 }}
                 ref={frameRef}
             >
                 <Image
-                    source={require('../assets/image_default_bg.png')}
-                    resizeMode="contain"
-                    style={{position: "absolute"}}
+                    source={image}
+                    resizeMode="cover"
+                    style={{position: "absolute", height: "100%", width: "100%"}}
                 />
             {itemState.items.map((item,index) =>
                 <ImageItemView key={index} itemIndex={index} />

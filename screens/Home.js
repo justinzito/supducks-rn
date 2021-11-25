@@ -1,14 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, createRef, useEffect } from 'react';
 import {
     useWindowDimensions,
     View,
     Platform,
     SafeAreaView,
     Image,
-    TouchableOpacity
+    TouchableOpacity,
+    Text,
+    BackHandler
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
+import ActionSheet from "react-native-actions-sheet";
+
+const actionSheetRef = createRef();
 
 export function Home({navigation}) {
 
@@ -16,31 +21,69 @@ export function Home({navigation}) {
 
     const insets = useSafeAreaInsets();
     const window = useWindowDimensions();
+    
+    
+    useEffect(() => {
+
+        actionSheetRef.current?.hide()
+        if (image != null) {
+            navigation.navigate('Canvas',{image: image});
+        }
+     },[image]);
 
 
-    const cameraPressed = async () => {
-        //navigation.navigate('Canvas',{})
+    const showImageChoice = () => {
+        actionSheetRef.current?.setModalVisible();
+    }
+
+    const snapImage = async () => {
+
+
+        const {status} = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+            alert('Sorry, we need camera roll permissions to make this work!');
+            return
+        }
+
+        let result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: false,
+            aspect: [4, 3],
+            quality: 1,
+          
+        });
+      
+        console.log(result.uri)
+        if (!result.cancelled) {
+            setImage({uri: result.uri});
+            
+        }
+    }
+
+    const pickImage = async () => {
+
+        const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
         
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        //const { status } = await ImagePicker.requestCameraPermissionsAsync();
         if (status !== 'granted') {
           alert('Sorry, we need camera roll permissions to make this work!');
           return
         }
-        //launchImageLibraryAsync
+        
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: false,
             aspect: [4, 3],
             quality: 1,
-          });
-      
+            
+        });
           
-          console.log(result)
-          if (!result.cancelled) {
+              
+        console.log(result.uri)
+        if (!result.cancelled) {
             setImage({uri: result.uri});
-          }
-
+            
+        }
+        
     }
 
     return (
@@ -137,7 +180,7 @@ export function Home({navigation}) {
                         flex: 2,
                         marginLeft: 0,
                     }}
-                    onPress={ () => cameraPressed() }
+                    onPress={ () => showImageChoice() }
                 >
                     <Image
                         source={require('../assets/camera_button.png')}
@@ -175,7 +218,88 @@ export function Home({navigation}) {
                     }}
                 />
             </TouchableOpacity>
+            <ActionSheet ref={actionSheetRef}>
+                <View
+                    style={{
+                        backgroundColor: "#fafafa",
+                        height: 180+insets.bottom,
+                    }}
+                >
+                    <TouchableOpacity
+                        style={{
 
+                            height: 60,
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: "#ffffff"
+                        }}
+                        onPress={() => snapImage()}
+                    >
+                        <Text
+                            style={{
+                                fontSize: 20,
+                                color: "#3478f6"
+                            }}
+                        >Snap Photo</Text>
+                    </TouchableOpacity>
+                    <View
+                            style={{
+                                height: 1,
+                                width: "100%",
+                                backgroundColor: "#f0f0f0"
+                            }}
+                    />
+                    <TouchableOpacity
+                        style={{
+
+                            height: 60,
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: "#ffffff"
+                        }}
+                        onPress={() => pickImage()}
+                    >
+                        <Text
+                            style={{
+                                fontSize: 20,
+                                color: "#3478f6"
+                            }}
+                        >Choose Photo</Text>
+                    </TouchableOpacity>
+                    <View
+                            style={{
+                                height: 1,
+                                width: "100%",
+                                backgroundColor: "#f0f0f0"
+                            }}
+                    />
+                    <TouchableOpacity
+                        style={{
+
+                            height: 60,
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: "#ffffff"
+                        }}
+                        onPress={() => {setImage(require('../assets/boardwalk.png'))}}
+                    >
+                        <Text
+                            style={{
+                                fontSize: 20,
+                                color: "#3478f6"
+                            }}
+                        >Boardwalk</Text>
+                    </TouchableOpacity>
+                    <View
+                            style={{
+                                height: 1,
+                                width: "100%",
+                                backgroundColor: "#f0f0f0"
+                            }}
+                    />
+                    
+                </View>
+            </ActionSheet>
         </SafeAreaView>
     )
 
