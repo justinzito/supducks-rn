@@ -60,8 +60,21 @@ export function Canvas({navigation, route}) {
         //console.log("image loading: " + JSON.stringify(route.params.image));
         //setImage(require('../assets/image_default_bg.png'));
         setImage(route.params.image)
+
+        if (route.params.picked != null) {
+            console.log("hey picked something")
+        }
         
      },[]);
+
+     useEffect(() => {
+        
+        if (route.params.picked != null) {
+            console.log("hey picked something")
+            addItem(route.params.picked)
+        }
+        
+     },[route]);
 
    
     const ImageItemView = ({itemIndex}) => {
@@ -273,8 +286,9 @@ export function Canvas({navigation, route}) {
             return;
         }
 
+        
         const newItem = {
-            image: require('../assets/pyramid.png'),
+            image: itemState.items[itemState.selectedIndex].image,//require('../assets/pyramid.png'),
             transform: scratchState
         }
 
@@ -284,7 +298,7 @@ export function Canvas({navigation, route}) {
         
     }
 
-    const addPressed = () => {
+    const addItem = (imagePath) => {
 
         if (itemState.selectedIndex > -1) {
             return
@@ -292,7 +306,7 @@ export function Canvas({navigation, route}) {
 
 
         const newItem = {
-            image: require('../assets/pyramid.png'),
+            image: imagePath,
             transform: {
                 offset: {x: 0, y: 0},
                 scale: 1,
