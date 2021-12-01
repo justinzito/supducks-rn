@@ -145,6 +145,7 @@ export class DragRotateScaleImage extends Component {
                                     style={[
                                         styles.box,
                                             {
+                                              resizeMode: "contain",
                                                 transform: [
                                                 { translateX: this._translateX },
                                                 { translateY: this._translateY },
@@ -173,13 +174,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   box: {
+    
     width: 150,
     height: 150,
     alignSelf: 'center',
     backgroundColor: '#ffffff7f',
     borderWidth: 2,
     borderColor: "#74f0fc",
-
+    
     zIndex: 200,
     position: "absolute"
   },

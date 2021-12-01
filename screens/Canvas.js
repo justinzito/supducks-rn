@@ -17,6 +17,9 @@ import * as Sharing from 'expo-sharing';
 
 export function Canvas({navigation, route}) {
 
+    const insets = useSafeAreaInsets();
+    const window = useWindowDimensions();
+
     const [image,setImage] = useState(require('../assets/image_default_bg.png'));
 
 
@@ -24,15 +27,7 @@ export function Canvas({navigation, route}) {
         {
             selectedIndex: -1,
             items: [
-                {
-                    image: require('../assets/pyramid.png'),
-                    transform: {
-                        offset: { x: 0, y: 0 },
-                        scale: 1,
-                        rotate: 0,
-                        scaleX: 1
-                    }
-                }
+                
             ]
         }
     );
@@ -42,7 +37,7 @@ export function Canvas({navigation, route}) {
     var scratchState = itemState.items.length-1 >= 0 ? 
     itemState.items[itemState.items.length-1].transform : 
     {
-        offset: {x: 0, y: 0},
+        offset: {x: 0, y: window.height*0.2},
         scale: 1,
         rotate: 0,
         scaleX: 1
@@ -60,17 +55,13 @@ export function Canvas({navigation, route}) {
         //console.log("image loading: " + JSON.stringify(route.params.image));
         //setImage(require('../assets/image_default_bg.png'));
         setImage(route.params.image)
-
-        if (route.params.picked != null) {
-            console.log("hey picked something")
-        }
         
      },[]);
 
      useEffect(() => {
         
         if (route.params.picked != null) {
-            console.log("hey picked something")
+            
             addItem(route.params.picked)
         }
         
@@ -111,7 +102,9 @@ export function Canvas({navigation, route}) {
                         width: 150,
                         height: 150,
                         alignSelf: 'center',
-                        position: "absolute"
+                        position: "absolute",
+                        resizeMode: "contain",
+                        margin: 10
                       },
                         {
                             transform: iosTranslateRotate(
@@ -288,7 +281,7 @@ export function Canvas({navigation, route}) {
 
         
         const newItem = {
-            image: itemState.items[itemState.selectedIndex].image,//require('../assets/pyramid.png'),
+            image: itemState.items[itemState.selectedIndex].image,
             transform: scratchState
         }
 
@@ -308,7 +301,7 @@ export function Canvas({navigation, route}) {
         const newItem = {
             image: imagePath,
             transform: {
-                offset: {x: 0, y: 0},
+                offset: {x: 0, y: window.height*0.2},
                 scale: 1,
                 rotate: 0,
                 scaleX: 1
@@ -337,7 +330,7 @@ export function Canvas({navigation, route}) {
         }
 
         var newItem = {
-            image: require('../assets/pyramid.png'),
+            image: itemState.items[itemState.selectedIndex].image,
             transform: {...scratchState,scaleX: scratchState.scaleX * -1}
         }
 
@@ -384,10 +377,6 @@ export function Canvas({navigation, route}) {
         }
     }
 
-    const insets = useSafeAreaInsets();
-    const window = useWindowDimensions();
-
-    
     return (
         <SafeAreaView
             style={{flex: 1, backgroundColor: "#ffffff"}}

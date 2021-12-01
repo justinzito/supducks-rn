@@ -6,7 +6,8 @@ import {
     Image,
     TouchableOpacity,
     Text,
-    FlatList
+    FlatList,
+    Platform
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -175,7 +176,7 @@ export function ImagePicker({navigation}) {
                 <View
                     style={{
                         flex: 1,
-                        height: 40,
+                        height: Platform.OS === 'android' ? 70 : 40,
                         marginLeft: 20,
                         justifyContent: "center",
                         alignItems: "center",
@@ -187,7 +188,7 @@ export function ImagePicker({navigation}) {
                 <TouchableOpacity
                     style={{
                         width: 40,
-                        height: 40,
+                        height: Platform.OS === 'android' ? 70 : 40,
                         alignItems: "center",
                         justifyContent: "center"
                     }}
